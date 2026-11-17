@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fff6ec">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>What Should We Eat?</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍜</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>What should we eat?</h1>
+
+    <div class="tabs" id="tabs" role="tablist" aria-label="Price range"></div>
+
+    <div class="wheel-wrap" id="wheelWrap">
+      <div class="pointer" id="pointer" aria-hidden="true"></div>
+      <canvas id="wheel" aria-label="Food wheel"></canvas>
+      <p class="empty" id="empty" hidden></p>
+    </div>
+
+    <button class="spin" id="spin" type="button">Spin</button>
+
+    <details class="editor" id="editor">
+      <summary>Edit this wheel <span class="count" id="count"></span></summary>
+      <ul class="items" id="list"></ul>
+      <form class="add" id="addForm" autocomplete="off">
+        <input id="addInput" type="text" maxlength="30" placeholder="Add a food…" aria-label="Food to add">
+        <button type="submit">Add</button>
+      </form>
+      <p class="msg" id="msg" role="status"></p>
+      <button class="link" id="reset" type="button">Reset this wheel to the original list</button>
+    </details>
+  </main>
+
+  <div class="overlay" id="overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="resultName">
+      <p class="result-prefix" id="resultPrefix"></p>
+      <p class="result-name" id="resultName"></p>
+      <p class="result-price" id="resultPrice"></p>
+      <button class="btn primary" id="done" type="button">Sounds good!</button>
+      <button class="btn" id="respin" type="button">Re-spin</button>
+      <button class="btn quiet" id="skip" type="button"></button>
+    </div>
+  </div>
+
+  <script src="foods.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

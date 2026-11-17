@@ -1,0 +1,278 @@
+:root {
+  --bg: #fff6ec;
+  --card: #ffffff;
+  --text: #2b2118;
+  --muted: #7d6f63;
+  --line: #ecdccb;
+  --accent: #e8502e;
+  --accent-text: #ffffff;
+  --shadow: 0 6px 24px rgba(90, 50, 20, 0.14);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1d1814;
+    --card: #2a231d;
+    --text: #f6ece2;
+    --muted: #b3a394;
+    --line: #40362d;
+    --accent: #ff6b47;
+    --accent-text: #1d1814;
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: max(16px, env(safe-area-inset-top)) 16px calc(32px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+h1 {
+  margin: 4px 0 0;
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+button { font: inherit; color: inherit; cursor: pointer; }
+
+/* ---------- Tabs ---------- */
+.tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr); /* fits however many wheels foods.js defines */
+  gap: 4px;
+  width: 100%;
+  padding: 5px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.tab {
+  border: 0;
+  background: transparent;
+  border-radius: 12px;
+  padding: 9px 4px;
+  min-height: 52px;
+  line-height: 1.2;
+}
+.tab b { display: block; font-size: 0.8rem; }
+.tab small { color: var(--muted); font-size: 0.75rem; }
+.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-text); }
+.tab[aria-selected="true"] small { color: inherit; opacity: 0.85; }
+
+/* ---------- Wheel ---------- */
+.wheel-wrap {
+  position: relative;
+  width: min(100%, 440px, 56vh);
+  min-width: 240px;
+  aspect-ratio: 1;
+  margin-top: 12px;
+}
+
+#wheel {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 50%;
+  box-shadow: var(--shadow);
+}
+
+.pointer {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 30px;
+  height: 38px;
+  margin-left: -15px;
+  background: var(--text);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0;
+  z-index: 2;
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 18%;
+  color: var(--muted);
+}
+.empty[hidden] { display: none; }
+
+/* ---------- Spin button ---------- */
+.spin {
+  width: 100%;
+  max-width: 320px;
+  padding: 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow);
+  transition: transform 0.1s, opacity 0.2s;
+}
+.spin:active { transform: scale(0.97); }
+.spin:disabled { opacity: 0.5; cursor: default; }
+
+/* ---------- Editor ---------- */
+.editor {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 0 14px;
+}
+.editor summary {
+  padding: 14px 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+.count { color: var(--muted); font-weight: 400; }
+
+.items { list-style: none; margin: 0; padding: 0; }
+.items li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  border-top: 1px solid var(--line);
+}
+.items .name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.items .skipped { color: var(--muted); }
+.items .skipped small { display: block; font-size: 0.75rem; }
+
+.chip {
+  border: 1px solid var(--line);
+  background: transparent;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.remove {
+  border: 0;
+  background: transparent;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+.remove:active, .chip:active { background: var(--line); }
+
+.add { display: flex; gap: 8px; padding: 12px 0 4px; border-top: 1px solid var(--line); }
+.add input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 12px;
+  font-size: 16px; /* 16px stops iOS zooming in on focus */
+  font-family: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.add button {
+  border: 0;
+  border-radius: 12px;
+  padding: 0 18px;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.msg { min-height: 1.2em; margin: 6px 0 0; font-size: 0.85rem; color: var(--accent); }
+
+.link {
+  border: 0;
+  background: transparent;
+  padding: 10px 0 14px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-decoration: underline;
+}
+
+/* ---------- Result popup ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(20, 12, 6, 0.55);
+}
+.overlay[hidden] { display: none; }
+
+.modal {
+  width: 100%;
+  max-width: 360px;
+  padding: 24px 20px 18px;
+  background: var(--card);
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  animation: pop 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+@keyframes pop {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.result-prefix { margin: 0; color: var(--muted); font-size: 1rem; }
+.result-name {
+  margin: 10px 0 8px;
+  padding: 14px 12px;
+  border-radius: 16px;
+  color: #2b2118;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.result-price { margin: 0 0 18px; color: var(--muted); font-size: 0.9rem; }
+
+.btn {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: transparent;
+  font-weight: 600;
+}
+.btn.primary { border: 0; background: var(--accent); color: var(--accent-text); }
+.btn.quiet { border: 0; color: var(--muted); font-weight: 400; font-size: 0.9rem; }
+.btn[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .modal { animation: none; }
+}
