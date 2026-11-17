@@ -104,3 +104,18 @@ const FOODS = {
 /* How many days an item stays off the wheel after you tap
    "We just had this". Set to 0 to hide that button. */
 const SKIP_DAYS = 3;
+
+/* ==========================================================================
+   SHARED LIST (optional)
+   ==========================================================================
+   Paste your Firebase Realtime Database URL between the quotes to make
+   in-app edits (add / remove / skip) show up on everyone's phone.
+   Example: "https://food-wheel-12345-default-rtdb.asia-southeast1.firebasedatabase.app"
+
+   Leave it as "" to keep edits on each phone separately.
+
+   Once sharing is on, the shared list is the real one: change foods in the
+   app, not here. The lists above are only the starting point and what
+   "Reset this wheel" goes back to.
+   ========================================================================== */
+const SHARED_DB_URL = "https://food-wheel-b9081-default-rtdb.asia-southeast1.firebasedatabase.app";

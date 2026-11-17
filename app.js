@@ -8,6 +8,8 @@
   var DAY_MS = 24 * 60 * 60 * 1000;
   var skipDays = typeof SKIP_DAYS === 'number' && SKIP_DAYS > 0 ? SKIP_DAYS : 0;
   var ids = Object.keys(FOODS);
+  // Shared database address from foods.js ("" = edits stay on this phone).
+  var SYNC_URL = (typeof SHARED_DB_URL === 'string' ? SHARED_DB_URL : '').trim().replace(/\/+$/, '');
 
   var $ = function (id) { return document.getElementById(id); };
   var canvas = $('wheel');
@@ -31,7 +33,8 @@
       var base = FOODS[id].items.map(function (s) { return String(s).trim(); }).filter(Boolean);
       var s = saved.wheels && saved.wheels[id];
       // Saved edits are kept only while the list in foods.js is unchanged.
-      var usable = s && Array.isArray(s.items) && JSON.stringify(s.base) === JSON.stringify(base);
+      // (With a shared list, the saved copy is always used until the shared one arrives.)
+      var usable = s && Array.isArray(s.items) && (SYNC_URL || JSON.stringify(s.base) === JSON.stringify(base));
       wheels[id] = usable
         ? { base: base, items: s.items.map(String), skipped: Object.assign({}, s.skipped) }
         : { base: base, items: base.slice(), skipped: {} };
@@ -39,8 +42,81 @@
     return { wheels: wheels, tab: ids.indexOf(saved.tab) >= 0 ? saved.tab : ids[0] };
   }
 
-  function save() {
+  function saveLocal() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  }
+
+  // Called after every edit to the current wheel.
+  function save() {
+    saveLocal();
+    pushWheel(state.tab);
+  }
+
+  /* ---------- Shared list (only used when SHARED_DB_URL is set) ---------- */
+
+  function setSync(text) { $('sync').textContent = text; }
+
+  // Each wheel is stored as one piece of JSON text, so food names can contain any characters.
+  function pushWheel(id) {
+    if (!SYNC_URL) return;
+    var w = state.wheels[id];
+    var body = JSON.stringify(JSON.stringify({ items: w.items, skipped: w.skipped }));
+    setSync('Saving to the shared list…');
+    fetch(SYNC_URL + '/wheels/' + id + '.json', { method: 'PUT', body: body })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        setSync('Shared list · up to date');
+      })
+      .catch(function () {
+        setSync('Could not save to the shared list. Check your connection and make the change again.');
+      });
+  }
+
+  // Returns true if the wheel changed.
+  function applyRemote(id, value) {
+    if (ids.indexOf(id) < 0 || typeof value !== 'string') return false;
+    var d;
+    try { d = JSON.parse(value); } catch (e) { return false; }
+    if (!d || !Array.isArray(d.items)) return false;
+    var w = state.wheels[id];
+    var next = {
+      items: d.items.map(String),
+      skipped: d.skipped && typeof d.skipped === 'object' ? d.skipped : {},
+    };
+    if (JSON.stringify({ items: w.items, skipped: w.skipped }) === JSON.stringify(next)) return false;
+    w.items = next.items;
+    w.skipped = next.skipped;
+    return true;
+  }
+
+  function onRemote(e) {
+    // Never change the wheel mid-spin; apply the update once it stops.
+    if (spinning) { setTimeout(function () { onRemote(e); }, 500); return; }
+    var msg;
+    try { msg = JSON.parse(e.data); } catch (x) { return; }
+    if (!msg || typeof msg.path !== 'string') return;
+    var changed = false;
+    if (msg.path === '/') {
+      if (msg.data && typeof msg.data === 'object') {
+        Object.keys(msg.data).forEach(function (id) {
+          changed = applyRemote(id, msg.data[id]) || changed;
+        });
+      }
+    } else {
+      changed = applyRemote(msg.path.slice(1), msg.data);
+    }
+    setSync('Shared list · up to date');
+    if (changed) { saveLocal(); render(); }
+  }
+
+  function startSync() {
+    if (!SYNC_URL || !window.EventSource) return;
+    setSync('Connecting to the shared list…');
+    var stream = new EventSource(SYNC_URL + '/wheels.json');
+    stream.addEventListener('put', onRemote);
+    stream.onerror = function () {
+      setSync('Offline. Showing the last list saved on this phone.');
+    };
   }
 
   function wheel() { return state.wheels[state.tab]; }
@@ -238,7 +314,7 @@
         state.tab = id;
         rot = 0;
         setMsg('');
-        save();
+        saveLocal();
         render();
       });
       tabs.appendChild(b);
@@ -386,4 +462,5 @@
 
   render();
   resize();
+  startSync();
 })();

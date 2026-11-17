@@ -218,6 +218,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
   text-decoration: underline;
 }
 
+.sync { margin: 0; font-size: 0.8rem; color: var(--muted); text-align: center; }
+.sync:empty { display: none; }
+
 /* ---------- Result popup ---------- */
 .overlay {
   position: fixed;
